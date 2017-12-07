@@ -24,6 +24,8 @@ Change the config.ini.php file to suit your environment
 
 Add an SQL query to the script.sql file
 
+Download the JSON file from Google API console containing the authentication information for a service account
+
 Run the index.php file
 
 ```
