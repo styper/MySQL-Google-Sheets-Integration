@@ -50,7 +50,6 @@ $results = array();
 
 if($query->rowCount() > 0){
   $fetchAll = $query->fetchAll();
-  //This foreach is used to rebuild the array with numbered values, otherwise Google API doesn't work
   foreach($fetchAll as $row){
     $rowTemp = array();
     foreach($row as $column){
@@ -62,6 +61,8 @@ if($query->rowCount() > 0){
     $results[] = $rowTemp;
   }
 }
+
+//print_r($results); //DEBUG
 
 $body = new Google_Service_Sheets_ValueRange([
   'values' => $results
@@ -76,12 +77,22 @@ echo date("c")."[INFO]Clearing sheet range:".$configs['GOOGLE_API']['spreadsheet
 
 $clearRequest = new Google_Service_Sheets_BatchClearValuesRequest();
 $clearRequest->setRanges($configs['GOOGLE_API']['spreadsheet_range']);
-$service->spreadsheets_values->batchClear($configs['GOOGLE_API']['spreadsheet_id'], $clearRequest);
+
+try {
+  $service->spreadsheets_values->batchClear($configs['GOOGLE_API']['spreadsheet_id'], $clearRequest);
+} catch(Google_Service_Exception $e) {
+  $error = json_decode($e->getMessage(), TRUE);
+  echo date("c")."[ERROR]Code:".$error['error']['code']." - Message:".$error['error']['message'].PHP_EOL;
+}
 
 echo date("c")."[INFO]Pushing array to range:".$configs['GOOGLE_API']['spreadsheet_range'].PHP_EOL;
 
-$result = $service->spreadsheets_values->update($configs['GOOGLE_API']['spreadsheet_id'], $configs['GOOGLE_API']['spreadsheet_range'], $body, $params);
-
-echo date("c")."[INFO]" . $result->getUpdatedCells() . " cells updated" .PHP_EOL;
+try {
+  $result = $service->spreadsheets_values->update($configs['GOOGLE_API']['spreadsheet_id'], $configs['GOOGLE_API']['spreadsheet_range'], $body, $params);  
+  echo date("c")."[INFO]" . $result->getUpdatedCells() . " cells updated" .PHP_EOL;
+} catch(Google_Service_Exception $e) {
+  $error = json_decode($e->getMessage(), TRUE);
+  echo date("c")."[ERROR]Code:".$error['error']['code']." - Message:".$error['error']['message'].PHP_EOL;
+}
 
 echo date("c")."[INFO]Process finished".PHP_EOL;
