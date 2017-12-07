@@ -15,7 +15,7 @@ MySQL 5.5
 Run Composer on the project folder to download the Google API libs
 
 ```
-Composer install
+composer install
 ```
 
 ### Running the program
